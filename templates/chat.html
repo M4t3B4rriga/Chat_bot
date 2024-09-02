@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Universitario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #e6e6e6;
+            padding: 10px;
+            border-radius: 18px;
+            float: right;
+            clear: both;
+        }
+        .bot-message {
+            background-color: #2f7e0b;
+            color: white;
+            padding: 10px;
+            border-radius: 18px;
+            float: left;
+            clear: both;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #e6e6e6;
+        }
+        #user-input {
+            flex-grow: 1;
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+        #send-button {
+            background-color: green;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-messages" id="chat-messages">
+        {% for mensaje in conversacion %}
+            <div class="message user-message">{{ mensaje.pregunta }}</div>
+            <div class="message bot-message">{{ mensaje.respuesta }}</div>
+        {% endfor %}
+    </div>
+    <form class="chat-input" id="chat-form">
+        <input type="text" id="user-input" placeholder="Escribe tu mensaje aquí..." required>
+        <button type="submit" id="send-button">Enviar</button>
+    </form>
+
+    <script>
+        function scrollToBottom() {
+            var chatMessages = document.getElementById('chat-messages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        document.getElementById('chat-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var userInput = document.getElementById('user-input');
+            var message = userInput.value;
+            userInput.value = '';
+
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'pregunta=' + encodeURIComponent(message)
+            })
+            .then(response => response.json())
+            .then(data => {
+                var chatMessages = document.getElementById('chat-messages');
+                chatMessages.innerHTML += '<div class="message user-message">' + data.pregunta + '</div>';
+                chatMessages.innerHTML += '<div class="message bot-message">' + data.respuesta + '</div>';
+                scrollToBottom();
+            });
+        });
+
+        window.onload = scrollToBottom;
+    </script>
+</body>
+</html>
